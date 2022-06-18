@@ -1,6 +1,8 @@
 # teste_api
 
-A new Flutter project.
+Projeto desenvolvido em Flutter.
+
+Um exemplo de uma barra de pesquisa utilizando o método showSearch()
 
 ## Getting Started
 
