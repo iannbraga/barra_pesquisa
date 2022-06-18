@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:teste_api/controller/user_controller.dart';
+import 'package:teste_api/widget/custom_search_delegate.dart';
 
 // ignore: use_key_in_widget_constructors
 class SearchPage extends StatefulWidget {
@@ -9,7 +10,7 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   final controller = UserController();
-
+  String resultadoPesquisa = 'Resultado da Pesquisa';
   _success() {
     return SizedBox(
       child: ListView.builder(
@@ -69,95 +70,38 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Barra de Pesquisa'),
+          title: const Text('Barra de Pesquisa'),
           actions: <Widget>[
             IconButton(
-              onPressed: () {
-                showSearch(
+              onPressed: () async {
+                final restulado = await showSearch(
                   context: context,
                   delegate: CustomSearchDelegate(
-                    todoUsuarios: controller.usuarios,
+                    todosUsuarios: controller.usuarios,
                     sugestaoUsuarios: controller.sugestaoUsuarios,
                   ),
                 );
+                setState(() {
+                  resultadoPesquisa = restulado;
+                });
               },
-              icon: Icon(Icons.search),
+              icon: const Icon(Icons.search),
             )
           ],
         ),
-        body: AnimatedBuilder(
-          animation: controller.state,
-          builder: (context, child) {
-            return stateManagement(controller.state.value);
-          },
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(resultadoPesquisa),
+            Expanded(
+              child: AnimatedBuilder(
+                animation: controller.state,
+                builder: (context, child) {
+                  return stateManagement(controller.state.value);
+                },
+              ),
+            ),
+          ],
         ));
-  }
-}
-
-class CustomSearchDelegate extends SearchDelegate {
-  final List<String> todoUsuarios;
-  final List<String> sugestaoUsuarios;
-
-  CustomSearchDelegate(
-      {required this.todoUsuarios, required this.sugestaoUsuarios});
-
-  @override
-  List<Widget>? buildActions(BuildContext context) {
-    return [
-      IconButton(
-        onPressed: () {
-          query = '';
-        },
-        icon: const Icon(Icons.close),
-      )
-    ];
-  }
-
-  @override
-  Widget? buildLeading(BuildContext context) {
-    return IconButton(
-      onPressed: () {
-        Navigator.pop(context);
-      },
-      icon: Icon(Icons.arrow_back),
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    final List<String> sugestaoUsuarios = todoUsuarios
-        .where(
-          (usuario) => usuario.toLowerCase().contains(
-                query.toLowerCase(),
-              ),
-        )
-        .toList();
-    return ListView.builder(
-      itemCount: sugestaoUsuarios.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: Text(sugestaoUsuarios[index]),
-        );
-      },
-    );
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    final List<String> todos = todoUsuarios
-        .where(
-          (usuario) => usuario.toLowerCase().contains(
-                query.toLowerCase(),
-              ),
-        )
-        .toList();
-    return ListView.builder(
-      itemCount: todos.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: Text(todos[index]),
-        );
-      },
-    );
   }
 }
